@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{example-layout.html}">
+<head>
+    <title>Pagination Template</title>
+</head>
+<body layout:fragment="content">
+<nav th:fragment="pagination(pagination)"
+     th:with="label='Pagination'"
+     th:attr="aria-label=${label}">
+    <ul class="pagination">
+        <li class="page-item" th:classappend="${pagination.previous.disabled} ? 'disabled' : ''">
+            <a th:unless="${pagination.previous.disabled}" class="page-link" th:href="${pagination.previous.href}">Previous</a>
+            <span th:if="${pagination.previous.disabled}" class="page-link">Previous</span>
+        </li>
+        <li class="page-item"
+            th:each="page, pageStat : ${pagination.pages}"
+            th:classappend="${page.current} ? 'active'">
+            <a th:unless="${page.current}" class="page-link" th:href="${page.href}" th:text="${pageStat.index + 1}"></a>
+            <span th:if="${page.current}" class="page-link" aria-current="page">
+        <th:block th:text="${pageStat.index + 1}"></th:block>
+        <span class="visually-hidden">(current)</span>
+      </span>
+        </li>
+        <li class="page-item" th:classappend="${pagination.next.disabled} ? 'disabled' : ''">
+            <a th:unless="${pagination.next.disabled}" class="page-link" th:href="${pagination.next.href}">Next</a>
+            <span th:if="${pagination.next.disabled}" class="page-link">Next</span>
+        </li>
+    </ul>
+</nav>
+</body>
+</html>
