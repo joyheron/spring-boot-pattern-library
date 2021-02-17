@@ -110,8 +110,6 @@ public class PatternLibraryController {
     return model;
   }
 
-
-
   private Optional<PatternLibraryEntry> findEntryByUri(String uri) {
     return getPatternLibraryGroups()
         .stream()
