@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:layout="http://www.w3.org/1999/xhtml" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8">
+    <title>Pattern Library</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+</head>
+<body id="aiur">
+<nav id="aiur-nav" style="width: 161px;">
+    <resize-handle id="aiur-nav-resize-handle" for="aiur-nav" direction="x" remember=""></resize-handle>
+
+    <ul>
+        <li><a href="/">Hello World</a></li>
+        <li th:each="group : ${groups}">
+            <a th:href="${#mvc.url('PLC#index').arg(0, group.uri).build()}" th:text="${group.name}"></a>
+            <ul th:if="${not #lists.isEmpty(group.entries)}">
+                <li th:each="entry : ${group.entries}">
+                    <a th:href="${#mvc.url('PLC#index').arg(0, entry.mainExample.uri).build()}" th:text="${entry.mainExample.name}"></a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+<main id="aiur-doc">
+    <h1>Hello World</h1>
+    <p th:text="${uri}"></p>
+
+</main>
+
+</body>
+</html>

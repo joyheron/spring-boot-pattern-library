@@ -1,5 +1,6 @@
 package com.heron.patternlibrary.components.bootstrap;
 
+import com.heron.patternlibrary.annotations.PatternLibraryComponents;
 import com.heron.patternlibrary.components.bootstrap.models.Pagination;
 
 import org.springframework.stereotype.Controller;
@@ -10,6 +11,7 @@ import org.springframework.web.servlet.ModelAndView;
 import java.util.Map;
 
 @Controller
+@PatternLibraryComponents
 @RequestMapping("/bootstrap")
 public class BootstrapController {
 
