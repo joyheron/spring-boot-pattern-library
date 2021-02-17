@@ -1,0 +1,19 @@
+{
+  "name": "spring-boot-pattern-library",
+  "version": "1.0.0",
+  "description": "A Spring Boot powered pattern library",
+  "scripts": {
+    "start": "npm run compile",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "compile": "faucet --compact"
+  },
+  "author": "joy.heron@innoq.com",
+  "license": "ISC",
+  "dependencies": {
+    "aiur": "^0.6.0"
+  },
+  "devDependencies": {
+    "faucet-pipeline-esnext": "^2.1.7",
+    "faucet-pipeline-sass": "^1.4.0"
+  }
+}
