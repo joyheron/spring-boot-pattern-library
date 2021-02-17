@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:layout="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.w3.org/1999/xhtml">
+<body>
+<th:block layout:fragment="tabs(example, index)">
+    <tabs-control role="tablist">
+        <button role="tab" aria-selected="true" tabindex="0"
+                th:attr="aria-controls=${'_' + index + '-html-frame'}">
+            Preview
+        </button>
+        <button role="tab" aria-selected="false" tabindex="0"
+                th:attr="aria-controls=${'_' + index + '-html-pre'}">
+            Template
+        </button>
+    </tabs-control>
+    <component-preview preview="rendered" class="component-preview">
+        <iframe th:id="${'_' + index + '-html-frame'}" class="component-preview-frame rendered" th:src="${example.uri}"></iframe>
+        <pre th:id="${'_' + index + '-html-pre'}" class="component-preview-pre-code">
+<th:block th:with="template=${example.getTemplate()}">
+<th:block th:if="${template.isPresent()}" th:text="${template.get()}"></th:block>
+</th:block>
+        </pre>
+    </component-preview>
+</th:block>
+</body>
+</html>

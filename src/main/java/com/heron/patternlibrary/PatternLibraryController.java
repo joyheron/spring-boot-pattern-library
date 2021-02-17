@@ -2,6 +2,8 @@ package com.heron.patternlibrary;
 
 import com.heron.patternlibrary.annotations.PatternLibraryComponents;
 
+import org.commonmark.parser.Parser;
+import org.commonmark.renderer.html.HtmlRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +46,9 @@ public class PatternLibraryController {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PatternLibraryController.class);
 
+  private static Parser PARSER = Parser.builder().build();
+  private static HtmlRenderer HTML_RENDERER = HtmlRenderer.builder().build();
+
   private static List<PatternLibraryGroup> patternLibraryGroups;
 
   @Autowired
@@ -52,20 +57,33 @@ public class PatternLibraryController {
   @Autowired
   private ResourceLoader resourceLoader;
 
+  @Value( "${patternlibrary.docs.prefix:/docs/}" )
+  private String docsPrefix;
+
   @Value( "${spring.thymeleaf.prefix:/templates/}" )
   private String thymeleafPrefix;
 
   @GetMapping("/")
   public ModelAndView index(@RequestParam(required = false) String uri) {
+    Optional<PatternLibraryEntry> entry = findEntry(uri);
+    if (entry.isPresent()) {
+      return new ModelAndView("pattern-library/details",
+          Map.of("groups", getPatternLibraryGroups(),
+          "entry", entry.get()));
+    }
 
-    System.out.println(getPatternLibraryGroups());
-
-    return new ModelAndView("pattern-library",
-        Map.of("groups", getPatternLibraryGroups(),
-            "uri", uri));
+    return new ModelAndView("pattern-library/index",
+        Map.of("groups", getPatternLibraryGroups()));
   }
 
-
+  private Optional<PatternLibraryEntry> findEntry(String uri) {
+    return getPatternLibraryGroups()
+        .stream()
+        .map(g -> g.findEntryBy(uri))
+        .filter(Optional::isPresent)
+        .map(Optional::get)
+        .findFirst();
+  }
 
   private List<PatternLibraryGroup> getPatternLibraryGroups() {
     if (patternLibraryGroups != null) {
@@ -94,14 +112,14 @@ public class PatternLibraryController {
               .filter(e -> !e.getKey().equals(uri))
               .collect(Collectors.toMap(Map.Entry::getKey,
                   e -> new PatternLibraryExample(extractNameFromMethod(e.getValue().getMethod().getName()), e.getKey(),
-                      extractTemplatePath(e.getValue()).orElse(null))));
+                      extractTemplatePath(e.getValue()))));
 
           Map<String, PatternLibraryEntry> entries = examples.entrySet()
               .stream()
               .filter(e -> !e.getKey().contains("--")) // Variants of components will have -- in the URI
               .collect(Collectors.toMap(Map.Entry::getKey,
                   e -> new PatternLibraryEntry(e.getValue(), new ArrayList<>(),
-                      extractComponentDir(e.getValue().getTemplatePath()))));
+                      e.getValue().getTemplatePath().flatMap(this::extractComponentDir))));
 
           examples.entrySet()
               .stream()
@@ -113,13 +131,13 @@ public class PatternLibraryController {
               .forEach(e -> {
                 PatternLibraryEntry mainEntry = entries.get(e.getKey()[0]);
                 mainEntry.examples.add(e.getValue());
+                mainEntry.examples.sort(Comparator.comparing(PatternLibraryExample::getName)); // TODO: might need some other way to order the variants
               });
 
           return new PatternLibraryGroup(uri, name, entries.values().stream()
               .sorted(Comparator.comparing(e -> e.getMainExample().name))
               .collect(Collectors.toList()));
         }).collect(Collectors.toList());
-    System.out.println(patternLibraryGroups);
 
     return patternLibraryGroups;
   }
@@ -192,7 +210,8 @@ public class PatternLibraryController {
       return componentDir
           .map(file -> file.listFiles((dir, name) -> name.equals("README.md")))
           .filter(files -> files.length > 0)
-          .flatMap(files -> extractFile(files[0]));
+          .flatMap(files -> extractFile(files[0]))
+          .map(PatternLibraryController::markdownToHTML);
     }
 
     @Override
@@ -209,9 +228,9 @@ public class PatternLibraryController {
   public static class PatternLibraryExample {
     private final String name;
     private final String uri;
-    private final String templatePath;
+    private final Optional<String> templatePath;
 
-    public PatternLibraryExample(String name, String uri, String templatePath) {
+    public PatternLibraryExample(String name, String uri, Optional<String> templatePath) {
       this.name = name;
       this.uri = uri;
       this.templatePath = templatePath;
@@ -225,8 +244,12 @@ public class PatternLibraryController {
       return uri;
     }
 
-    public String getTemplatePath() {
+    public Optional<String> getTemplatePath() {
       return templatePath;
+    }
+
+    public Optional<String> getTemplate() {
+      return templatePath.flatMap(PatternLibraryController::extractResource);
     }
 
     @Override
@@ -314,5 +337,9 @@ public class PatternLibraryController {
       LOGGER.info("Could not extract file={}", file);
       return Optional.empty();
     }
+  }
+
+  public static String markdownToHTML(String markdown) {
+    return HTML_RENDERER.render(PARSER.parse(markdown));
   }
 }

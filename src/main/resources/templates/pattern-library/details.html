@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:layout="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.w3.org/1999/xhtml"
+      layout:decorate="~{pattern-library/layout.html}">
+<head>
+    <title th:text="${entry.mainExample.name}"></title>
+</head>
+<body>
+    <th:block layout:fragment="content">
+        <h1 th:text="${entry.mainExample.name}"></h1>
+
+        <th:block th:with="doc=${entry.getDocumentation()}">
+            <th:block th:if="${doc.isPresent()}" th:utext="${doc.get()}"></th:block>
+        </th:block>
+
+        <th:block layout:replace="~{pattern-library/components.html :: tabs(example=${entry.mainExample}, index='0')}"></th:block>
+
+        <th:block th:each="example, iterStat : ${entry.examples}">
+            <h2 th:text="${example.name}"></h2>
+            <th:block layout:replace="~{pattern-library/components.html :: tabs(example=${example}, index=${iterStat.index + 1})}"></th:block>
+        </th:block>
+    </th:block>
+</body>
+</html>
