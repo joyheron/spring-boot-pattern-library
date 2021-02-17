@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{example-layout.html}">
+<head>
+    <title>Flex Wrap Example</title>
+</head>
+<body layout:fragment="content">
+
+<div layout:replace="~{components/containers/flex-wrap/template.html :: flex-wrap}">
+    <th:block layout:fragment="flex-content">
+        <div>1</div>
+        <div>2</div>
+        <div>3</div>
+        <div>4</div>
+        <div>5</div>
+        <div>6</div>
+        <div>7</div>
+        <div>8</div>
+        <div>9</div>
+        <div>10</div>
+        <div>11</div>
+        <div>12</div>
+        <div>13</div>
+        <div>14</div>
+        <div>15</div>
+        <div>16</div>
+        <div>17</div>
+        <div>18</div>
+        <div>19</div>
+        <div>20</div>
+    </th:block>
+</div>
+
+<style>
+    /* Some styling for the example components, not part of actual assets */
+    .flex-wrap > * > * {
+        padding: 1rem;
+        background-color: lightpink;
+    }
+
+    .flex-wrap > * > *:nth-child(3n + 1) {
+        width: 6rem;
+    }
+    .flex-wrap > * > *:nth-child(5n + 1) {
+        width: 10rem;
+    }
+</style>
+</body>
+</html>

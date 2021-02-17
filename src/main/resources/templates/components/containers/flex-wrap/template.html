@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{example-layout.html}">
+<head>
+    <title>Flex Wrap Template</title>
+</head>
+<body layout:fragment="content">
+
+<div class="flex-wrap" layout:fragment="flex-wrap">
+    <div>
+        <th:block layout:fragment="flex-content"></th:block>
+    </div>
+</div>
+</body>
+</html>

@@ -3,14 +3,16 @@
   "version": "1.0.0",
   "description": "A Spring Boot powered pattern library",
   "scripts": {
-    "start": "npm run compile",
+    "start": "npm run compile:watch",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "compile": "faucet --compact"
+    "compile": "faucet --compact",
+    "compile:watch": "faucet --watch"
   },
   "author": "joy.heron@innoq.com",
   "license": "ISC",
   "dependencies": {
-    "aiur": "^0.6.0"
+    "aiur": "^0.6.0",
+    "bootstrap": "^4.6.0"
   },
   "devDependencies": {
     "faucet-pipeline-esnext": "^2.1.7",

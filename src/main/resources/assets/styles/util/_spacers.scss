@@ -1,0 +1,8 @@
+// Define spacer variables based on Bootstraps spacers
+
+$spacer-xxs: map-get($map: $spacers, $key: 1) / 2;
+$spacer-xs: map-get($map: $spacers, $key: 1);
+$spacer-sm: map-get($map: $spacers, $key: 2);
+$spacer-base: map-get($map: $spacers, $key: 3);
+$spacer-md: map-get($map: $spacers, $key: 4);
+$spacer-lg: map-get($map: $spacers, $key: 5);

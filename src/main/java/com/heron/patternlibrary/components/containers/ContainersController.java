@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/containers")
 public class ContainersController {
 
-  @GetMapping("/foo")
-  public String foo() {
-    return "components/containers/foo";
+  @GetMapping("/flex-wrap")
+  public String flexWrap() {
+    return "components/containers/flex-wrap/example";
   }
 }

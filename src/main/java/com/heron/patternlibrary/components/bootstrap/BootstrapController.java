@@ -15,11 +15,6 @@ import java.util.Map;
 @RequestMapping("/bootstrap")
 public class BootstrapController {
 
-  @GetMapping("")
-  public String bootstrap() {
-    return "index";
-  }
-
   @GetMapping("/alerts")
   public String alerts() {
     return "components/bootstrap/alerts/alerts";

@@ -21,7 +21,7 @@
             <a th:unless="${page.current}" class="page-link" th:href="${page.href}" th:text="${pageStat.index + 1}"></a>
             <span th:if="${page.current}" class="page-link" aria-current="page">
         <th:block th:text="${pageStat.index + 1}"></th:block>
-        <span class="visually-hidden">(current)</span>
+        <span class="sr-only">(current)</span>
       </span>
         </li>
         <li class="page-item" th:classappend="${pagination.next.disabled} ? 'disabled' : ''">
