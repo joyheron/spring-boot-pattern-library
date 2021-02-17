@@ -30,10 +30,10 @@ import java.lang.reflect.Method;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -57,7 +57,10 @@ public class PatternLibraryController {
   @Autowired
   private ResourceLoader resourceLoader;
 
-  @Value( "${patternlibrary.docs.prefix:/docs/}" )
+  @Value("${patternlibrary.app.name:Pattern Library}")
+  private String appName;
+
+  @Value("${patternlibrary.docs.prefix:/docs/}" )
   private String docsPrefix;
 
   @Value( "${spring.thymeleaf.prefix:/templates/}" )
@@ -65,18 +68,51 @@ public class PatternLibraryController {
 
   @GetMapping("/")
   public ModelAndView index(@RequestParam(required = false) String uri) {
-    Optional<PatternLibraryEntry> entry = findEntry(uri);
+    Optional<PatternLibraryEntry> entry = findEntryByUri(uri);
+
     if (entry.isPresent()) {
-      return new ModelAndView("pattern-library/details",
-          Map.of("groups", getPatternLibraryGroups(),
-          "entry", entry.get()));
+      return new ModelAndView("pattern-library/details", modelWithEntry(entry.get()));
     }
 
-    return new ModelAndView("pattern-library/index",
-        Map.of("groups", getPatternLibraryGroups()));
+    Optional<String> documentation = extractResource("/docs/intro.md")
+        .map(PatternLibraryController::markdownToHTML);
+
+    return new ModelAndView("pattern-library/docs",
+        modelWithDocumentation(appName, documentation));
   }
 
-  private Optional<PatternLibraryEntry> findEntry(String uri) {
+  @GetMapping("/docs")
+  public ModelAndView docs(@RequestParam(required = false, defaultValue = "Pattern Library") String title,
+                           @RequestParam String docPath) {
+    Optional<String> documentation = extractResource(docPath)
+        .map(PatternLibraryController::markdownToHTML);
+    return new ModelAndView("pattern-library/docs",
+        modelWithDocumentation(title, documentation));
+  }
+
+  public Map<String, Object> modelWithEntry(PatternLibraryEntry entry) {
+    Map<String, Object> model = model();
+    model.put("entry", entry);
+    return model;
+  }
+
+  public Map<String, Object> modelWithDocumentation(String pageTitle, Optional<String> documentation) {
+    Map<String, Object> model = model();
+    model.put("title", pageTitle);
+    model.put("documentation", documentation);
+    return model;
+  }
+
+  public Map<String, Object> model() {
+    Map<String, Object> model = new HashMap<>();
+    model.put("appName", appName);
+    model.put("groups", getPatternLibraryGroups());
+    return model;
+  }
+
+
+
+  private Optional<PatternLibraryEntry> findEntryByUri(String uri) {
     return getPatternLibraryGroups()
         .stream()
         .map(g -> g.findEntryBy(uri))
@@ -98,18 +134,17 @@ public class PatternLibraryController {
         .map(entry -> {
           // Remove "Controller" from class name to get name for category
           String name = entry.getKey().getSimpleName().replaceAll("Controller", "");
+          Optional<PatternLibraryComponents> annotation = entry.getValue().stream().findFirst()
+              .map(e -> e.getValue().getBeanType().getAnnotation(PatternLibraryComponents.class));
 
-          String uri = entry.getValue()
-              .stream()
-              .map(e -> e.getKey().getPatternsCondition().getPatterns())
-              .flatMap(Set::stream)
-              .min(Comparator.comparing(String::length))
-              .orElseThrow(() -> new RuntimeException("Could not find a base URI for Controller: " + entry.getKey()));
+          Optional<String> docPath = annotation
+              .map(PatternLibraryComponents::docs)
+              .filter(StringUtils::hasLength)
+              .map(docs -> docsPrefix + docs);
 
           Map<String, PatternLibraryExample> examples = entry.getValue()
               .stream()
               .map(e -> Map.entry(e.getKey().getPatternsCondition().getPatterns().stream().findFirst().orElse(""), e.getValue()))
-              .filter(e -> !e.getKey().equals(uri))
               .collect(Collectors.toMap(Map.Entry::getKey,
                   e -> new PatternLibraryExample(extractNameFromMethod(e.getValue().getMethod().getName()), e.getKey(),
                       extractTemplatePath(e.getValue()))));
@@ -134,10 +169,12 @@ public class PatternLibraryController {
                 mainEntry.examples.sort(Comparator.comparing(PatternLibraryExample::getName)); // TODO: might need some other way to order the variants
               });
 
-          return new PatternLibraryGroup(uri, name, entries.values().stream()
+          return new PatternLibraryGroup(name, docPath, entries.values().stream()
               .sorted(Comparator.comparing(e -> e.getMainExample().name))
-              .collect(Collectors.toList()));
+              .collect(Collectors.toList()), annotation.get().order());
         }).collect(Collectors.toList());
+
+    patternLibraryGroups.sort(Comparator.comparing(PatternLibraryGroup::getOrder));
 
     return patternLibraryGroups;
   }
@@ -150,36 +187,52 @@ public class PatternLibraryController {
   }
 
   public static class PatternLibraryGroup {
-    private final String uri;
     private final String name;
+    private final Optional<String> docPath;
     private final List<PatternLibraryEntry> entries;
+    private final int order;
 
-    public PatternLibraryGroup(String uri, String name, List<PatternLibraryEntry> entries) {
-      this.uri = uri;
+    public PatternLibraryGroup(String name, Optional<String> docPath, List<PatternLibraryEntry> entries, int order) {
       this.name = name;
+      this.docPath = docPath;
       this.entries = entries;
-    }
-
-    public String getUri() {
-      return uri;
+      this.order = order;
     }
 
     public String getName() {
       return name;
     }
 
+    public Optional<String> getDocPath() {
+      return docPath;
+    }
+
     public List<PatternLibraryEntry> getEntries() {
       return entries;
+    }
+
+    public Optional<String> getDocumentation() {
+      return docPath.flatMap(PatternLibraryController::extractResource)
+          .map(PatternLibraryController::markdownToHTML);
+    }
+
+    public int getOrder() {
+      return order;
     }
 
     @Override
     public String toString() {
       final StringBuilder sb = new StringBuilder("PatternLibraryGroup{");
-      sb.append("uri='").append(uri).append('\'');
-      sb.append(", name='").append(name).append('\'');
+      sb.append("name='").append(name).append('\'');
+      sb.append(", docPath=").append(docPath);
       sb.append(", entries=").append(entries);
+      sb.append(", order=").append(order);
       sb.append('}');
       return sb.toString();
+    }
+
+    public Optional<PatternLibraryEntry> findEntryBy(String uri) {
+      return entries.stream().filter(e -> e.getMainExample().getUri().equals(uri)).findFirst();
     }
   }
 

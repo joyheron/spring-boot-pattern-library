@@ -11,7 +11,7 @@ import org.springframework.web.servlet.ModelAndView;
 import java.util.Map;
 
 @Controller
-@PatternLibraryComponents
+@PatternLibraryComponents(docs = "bootstrap.md", order = 1)
 @RequestMapping("/bootstrap")
 public class BootstrapController {
 

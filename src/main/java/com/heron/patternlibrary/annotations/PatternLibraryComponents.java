@@ -11,4 +11,7 @@ import java.lang.annotation.Target;
 @Documented
 public @interface PatternLibraryComponents {
 
+  String docs() default "";
+
+  int order() default 0;
 }

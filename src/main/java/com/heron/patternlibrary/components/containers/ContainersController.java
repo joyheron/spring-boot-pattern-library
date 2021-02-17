@@ -7,14 +7,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@PatternLibraryComponents
+@PatternLibraryComponents(order = 2, docs = "containers.md")
 @RequestMapping("/containers")
 public class ContainersController {
-
-  @GetMapping("")
-  public String bootstrap() {
-    return "index";
-  }
 
   @GetMapping("/foo")
   public String foo() {

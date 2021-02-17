@@ -4,11 +4,11 @@
       xmlns:th="http://www.w3.org/1999/xhtml"
       layout:decorate="~{pattern-library/layout.html}">
 <head>
-    <title>Pattern Library</title>
+    <title th:text="${title}">Pattern Library</title>
 </head>
 <body>
 <th:block layout:fragment="content">
-    <h1>Index</h1>
+    <th:block th:if="${documentation.isPresent()}" th:utext="${documentation.get()}"></th:block>
 </th:block>
 </body>
 </html>
