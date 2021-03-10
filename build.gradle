@@ -3,9 +3,10 @@ plugins {
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java'
     id 'application'
+    id 'maven-publish'
 }
 
-group = 'com.heron.pattern-lib'
+group = 'com.heron'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '1.9'
 
@@ -31,4 +32,34 @@ application {
 
 test {
     useJUnitPlatform()
+}
+
+configurations {
+    [apiElements, runtimeElements].each {
+        it.outgoing.artifacts.removeIf { it.buildDependencies.getDependencies(null).contains(jar) }
+        it.outgoing.artifact(bootJar)
+    }
+}
+
+task sourceJar(type: Jar) {
+    archiveClassifier = "sources"
+}
+
+jar {
+    enabled = true
+}
+
+bootJar {
+    classifier = 'boot'
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifactId = 'pattern-library'
+
+            artifact sourceJar
+            artifact jar
+        }
+    }
 }
