@@ -1,16 +1,18 @@
 "use strict";
 
+let staticAssetsBaseDir = process.env.COMPILED_ASSETS_OUTPUT_DIR || "./build/resources/main/static/pattern-library";
+
 module.exports = {
     watchDirs: ["./src"],
     js: [{
         source: "./node_modules/aiur/lib/client/index.js",
-        target: "./build/resources/main/static/script-aiur.js",
+        target: `${staticAssetsBaseDir}/script-aiur.js`,
     }],
     sass: [{
         source: "./node_modules/aiur/lib/style.scss",
-        target: "./build/resources/main/static/style-aiur.css"
+        target: `${staticAssetsBaseDir}/style-aiur.css`
     }, {
         source: "./src/main/resources/assets/styles/index.scss",
-        target: "./build/resources/main/static/bundle.css"
+        target: `${staticAssetsBaseDir}/bundle.css`
     }]
 };

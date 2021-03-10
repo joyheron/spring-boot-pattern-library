@@ -45,6 +45,14 @@ task sourceJar(type: Jar) {
     archiveClassifier = "sources"
 }
 
+task compileAssets(type: Exec) {
+    executable "npm"
+    args "run", "compile"
+}
+tasks.matching { it.name != 'compileAssets' }.all { Task task ->
+    task.dependsOn(compileAssets)
+}
+
 jar {
     enabled = true
 }
