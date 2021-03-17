@@ -165,19 +165,29 @@ examples) if you add new asset files, in order for those files to take effect.
 
 [faucet-pipeline]: https://www.faucet-pipeline.org/
 
-
-## What is not (yet) supported
-
 ### Live Reload
 
-There is currently no live reloading of components when we modify the template
-file or the asset files. Currently, if you modify any asset files, you need to
-reload the browser to see any changes. If you modify a template file, you will
-also need to rebuild your project (if you are using an IDE). This would be
-CMD+F9 _MacOS_ or CTRL+F9 _Windows_. 
+This pattern library uses the `spring-boot-devtools` to reload the application
+when changes in the templates or the controllers occur. Spring Devtools only
+notices when a template changes when it appears on the classpath, so it may
+be necessary to rebuild the project when the change has been made
+In IntelliJ, this can be done with CMD+F9 _MacOS_ or CTRL+F9 _Windows_.
+After the template has changed, the browser needs to be refreshed to view
+the new HTML markup in the pattern library.
 
-This is definitely not ideal, and I'm open for suggestions about how to make
-this easier in the future.
+The pattern library uses the embedded [LiveReload] server from Spring Boot in
+order to reload the assets whenever any of the asset files change. This means
+that you do not need to refresh the browser page when changes are only made to
+the asset files.
+
+_Note_: You can only run one LiveReload server at a time, so if the asset reloading
+is not working correctly, check to see that you don't have any other applications
+with LiveReload servers that are running (e.g if other Spring Boot applications which
+also have the Spring DevTools activated are running).
+
+[LiveReload]: https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#using-boot-devtools-livereload
+
+## What is not (yet) supported
 
 ### Pattern Library Features
 
