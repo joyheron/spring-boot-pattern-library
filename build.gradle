@@ -20,8 +20,8 @@ dependencies {
     implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
-    compile 'org.apache.commons:commons-text:1.9'
-    compile 'org.commonmark:commonmark:0.17.1'
+    implementation 'org.apache.commons:commons-text:1.9'
+    implementation 'org.commonmark:commonmark:0.17.1'
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 }
